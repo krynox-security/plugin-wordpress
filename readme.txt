@@ -27,7 +27,7 @@ Protects, out of the box:
 Each is toggleable in **Settings → Krynox Captcha**. Verification happens
 server-to-server against the Krynox data plane using your secret key.
 
-You need a free Krynox account and a site's keys from https://app.krynox.id.
+You need a free Krynox account and a site's keys from https://app.krynox.net.
 
 == Installation ==
 
@@ -41,7 +41,7 @@ You need a free Krynox account and a site's keys from https://app.krynox.id.
 == Frequently Asked Questions ==
 
 = Where do I get my keys? =
-Create a free account at https://app.krynox.id, add a site, and copy its site key
+Create a free account at https://app.krynox.net, add a site, and copy its site key
 (public) and secret key (private).
 
 = Does it use cookies or track users? =

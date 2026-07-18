@@ -1,13 +1,13 @@
 <?php
 /**
  * Plugin Name:       Krynox Captcha
- * Plugin URI:        https://krynox.id
+ * Plugin URI:        https://krynox.net
  * Description:       Privacy-first, proof-of-work CAPTCHA for WordPress — protects login, registration, lost-password and comment forms. No cookies, no puzzles.
  * Version:           0.1.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Krynox
- * Author URI:        https://krynox.id
+ * Author URI:        https://krynox.net
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       krynox-captcha
@@ -96,8 +96,8 @@ class Krynox_Captcha {
 			array(
 				'site_key'             => '',
 				'secret_key'           => '',
-				'api_host'             => 'https://api.krynox.id',
-				'cdn_host'             => 'https://cdn.krynox.id',
+				'api_host'             => 'https://api.krynox.net',
+				'cdn_host'             => 'https://cdn.krynox.net',
 				'protect_login'        => 1,
 				'protect_register'     => 1,
 				'protect_lostpassword' => 1,
@@ -164,6 +164,11 @@ class Krynox_Captcha {
 	/**
 	 * Server-to-server verify against /siteverify.
 	 *
+	 * Retries transient failures (network / 429 / 5xx) with a per-verify idempotency key, so a
+	 * retried single-use token replays the first outcome instead of failing. Advanced integrators
+	 * can hook `krynox_captcha_verified` to act on the full result (score, risk, reasons, agent,
+	 * human) or to force-reject a structurally-valid solution.
+	 *
 	 * @param string $token Solved token.
 	 * @return bool
 	 */
@@ -171,26 +176,58 @@ class Krynox_Captcha {
 		if ( empty( $token ) ) {
 			return false;
 		}
-		$o   = $this->options();
-		$res = wp_remote_post(
-			esc_url_raw( $o['api_host'] ) . '/siteverify',
+		$o       = $this->options();
+		$retries = 2;
+		// A token is single-use, so a retried verify carries an idempotency key.
+		$key     = function_exists( 'wp_generate_uuid4' ) ? wp_generate_uuid4() : bin2hex( random_bytes( 16 ) );
+		$payload = wp_json_encode(
 			array(
-				'timeout' => 5,
-				'headers' => array( 'content-type' => 'application/json' ),
-				'body'    => wp_json_encode(
-					array(
-						'secret'   => $o['secret_key'],
-						'response' => $token,
-						'remoteip' => $this->client_ip(),
-					)
-				),
+				'secret'          => $o['secret_key'],
+				'response'        => $token,
+				'remoteip'        => $this->client_ip(),
+				'idempotency_key' => $key,
 			)
 		);
-		if ( is_wp_error( $res ) ) {
+
+		$data = null;
+		for ( $attempt = 0; $attempt <= $retries; $attempt++ ) {
+			$res = wp_remote_post(
+				esc_url_raw( $o['api_host'] ) . '/siteverify',
+				array(
+					'timeout' => 5,
+					'headers' => array( 'content-type' => 'application/json' ),
+					'body'    => $payload,
+				)
+			);
+			if ( is_wp_error( $res ) ) {
+				if ( $attempt < $retries ) {
+					usleep( (int) ( min( 1.0, 0.1 * pow( 2, $attempt ) ) * 1000000 ) );
+					continue;
+				}
+				return false;
+			}
+			$code = (int) wp_remote_retrieve_response_code( $res );
+			if ( ( 429 === $code || $code >= 500 ) && $attempt < $retries ) {
+				usleep( (int) ( min( 1.0, 0.1 * pow( 2, $attempt ) ) * 1000000 ) );
+				continue;
+			}
+			$data = json_decode( wp_remote_retrieve_body( $res ), true );
+			break;
+		}
+
+		if ( ! is_array( $data ) ) {
 			return false;
 		}
-		$data = json_decode( wp_remote_retrieve_body( $res ), true );
-		return is_array( $data ) && ! empty( $data['success'] );
+
+		$success = ! empty( $data['success'] );
+
+		/**
+		 * Filter the boolean verification outcome with the full server result available.
+		 *
+		 * @param bool  $success Whether the solution verified.
+		 * @param array $data    The full /siteverify response (score, risk, reasons, agent, human, …).
+		 */
+		return (bool) apply_filters( 'krynox_captcha_verified', $success, $data );
 	}
 
 	/**
@@ -304,8 +341,8 @@ class Krynox_Captcha {
 		$out               = array();
 		$out['site_key']   = isset( $input['site_key'] ) ? sanitize_text_field( $input['site_key'] ) : '';
 		$out['secret_key'] = isset( $input['secret_key'] ) ? sanitize_text_field( $input['secret_key'] ) : '';
-		$out['api_host']   = ! empty( $input['api_host'] ) ? esc_url_raw( $input['api_host'] ) : 'https://api.krynox.id';
-		$out['cdn_host']   = ! empty( $input['cdn_host'] ) ? esc_url_raw( $input['cdn_host'] ) : 'https://cdn.krynox.id';
+		$out['api_host']   = ! empty( $input['api_host'] ) ? esc_url_raw( $input['api_host'] ) : 'https://api.krynox.net';
+		$out['cdn_host']   = ! empty( $input['cdn_host'] ) ? esc_url_raw( $input['cdn_host'] ) : 'https://cdn.krynox.net';
 		foreach ( array( 'protect_login', 'protect_register', 'protect_lostpassword', 'protect_comments' ) as $k ) {
 			$out[ $k ] = empty( $input[ $k ] ) ? 0 : 1;
 		}
@@ -320,7 +357,7 @@ class Krynox_Captcha {
 		?>
 		<div class="wrap">
 			<h1>Krynox Captcha</h1>
-			<p>Privacy-first, proof-of-work CAPTCHA. Get your keys at <a href="https://app.krynox.id" target="_blank" rel="noopener">app.krynox.id</a>.</p>
+			<p>Privacy-first, proof-of-work CAPTCHA. Get your keys at <a href="https://app.krynox.net" target="_blank" rel="noopener">app.krynox.net</a>.</p>
 			<form method="post" action="options.php">
 				<?php settings_fields( 'krynox_captcha' ); ?>
 				<table class="form-table" role="presentation">
