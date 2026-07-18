@@ -1,0 +1,23 @@
+name: Release
+
+# Deploys the plugin to the WordPress.org SVN repository on a version tag. Dormant until tagged.
+# Requires WPORG_SVN_USERNAME + WPORG_SVN_PASSWORD secrets, and the plugin slug must already be
+# approved/hosted on WordPress.org (a one-time manual submission + review).
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-wordpress:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: WordPress.org plugin deploy
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.WPORG_SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.WPORG_SVN_PASSWORD }}
+          SLUG: krynox-captcha
