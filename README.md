@@ -44,4 +44,4 @@ for self-hosting).
 ## License
 
 GPL-2.0-or-later (WordPress-compatible). See [LICENSE](./LICENSE).
-Built for [Krynox Captcha](https://krynox.net) · docs: <https://krynox.net/docs>
+Built for [Krynox Captcha](https://krynox.net) · docs: <https://docs.krynox.net>
