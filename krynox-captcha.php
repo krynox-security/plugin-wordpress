@@ -162,6 +162,16 @@ class Krynox_Captcha {
 	}
 
 	/**
+	 * The honeypot decoy value the widget injects as a hidden "krynox-hp" field.
+	 * A real user never fills it; forwarded to /siteverify as `honeypot`.
+	 *
+	 * @return string
+	 */
+	private function honeypot() {
+		return isset( $_POST['krynox-hp'] ) ? sanitize_text_field( wp_unslash( $_POST['krynox-hp'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+	}
+
+	/**
 	 * Server-to-server verify against /siteverify.
 	 *
 	 * Retries transient failures (network / 429 / 5xx) with a per-verify idempotency key, so a
@@ -185,6 +195,7 @@ class Krynox_Captcha {
 				'secret'          => $o['secret_key'],
 				'response'        => $token,
 				'remoteip'        => $this->client_ip(),
+				'honeypot'        => $this->honeypot(),
 				'idempotency_key' => $key,
 			)
 		);
