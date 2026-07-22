@@ -41,6 +41,14 @@ add_filter( 'krynox_captcha_verified', function ( $success, $data ) {
 Site key · secret key · per-form toggles · API host · CDN host (override the last two
 for self-hosting).
 
+## Honeypot
+
+Enable **Honeypot** for the site in the Krynox dashboard and the widget injects an invisible decoy
+field (`krynox-hp`) that only bots fill in. The plugin forwards it to `/siteverify` as `honeypot`
+automatically on every protected form (login, register, lost-password, comments) — no configuration
+needed. The data plane then floors the score (report mode) or rejects with `honeypot-tripped`
+(enforce mode). See the [Honeypot docs](https://docs.krynox.net/server-side/honeypot/).
+
 ## License
 
 GPL-2.0-or-later (WordPress-compatible). See [LICENSE](./LICENSE).
