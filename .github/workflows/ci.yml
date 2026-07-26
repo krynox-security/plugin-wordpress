@@ -1,0 +1,31 @@
+# GitHub Actions — integration tests. No WordPress install: tests/bootstrap.php
+# is a minimal WP function shim, and tests/run.php drives the plugin's hooks
+# against a real local HTTP mock of the Krynox data plane (php -S).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Integration tests (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ["7.4", "8.3", "8.4"]
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: shivammathur/setup-php@cf4cade2721270509d5b1c766ab3549210a39a2a # v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+      - name: Run integration tests
+        run: php tests/run.php
