@@ -1,0 +1,57 @@
+{
+  "krynox-captcha.php": {
+    "mtime": 1784711053.6576648,
+    "ast_hash": "d67b13bee160905e55b37f78fcdfb7cf",
+    "semantic_hash": "d67b13bee160905e55b37f78fcdfb7cf"
+  },
+  "tests/bootstrap.php": {
+    "mtime": 1785087684.4728138,
+    "ast_hash": "6031357f3c3b98a092a3353474ec5812",
+    "semantic_hash": "6031357f3c3b98a092a3353474ec5812"
+  },
+  "tests/router.php": {
+    "mtime": 1785087685.9848201,
+    "ast_hash": "806126a8bfff2b058541b1a311cf5b69",
+    "semantic_hash": "806126a8bfff2b058541b1a311cf5b69"
+  },
+  "tests/run.php": {
+    "mtime": 1785087732.7840145,
+    "ast_hash": "a8d4d803a7b9aa48b3659cb287da392d",
+    "semantic_hash": "a8d4d803a7b9aa48b3659cb287da392d"
+  },
+  "uninstall.php": {
+    "mtime": 1782297594.3964753,
+    "ast_hash": "279afd53e2843b77fe9a055c70764a23",
+    "semantic_hash": "279afd53e2843b77fe9a055c70764a23"
+  },
+  ".github/workflows/ci.yml": {
+    "mtime": 1785087749.160089,
+    "ast_hash": "2deafa5db9cbc517416b4d435259fabf",
+    "semantic_hash": ""
+  },
+  ".github/workflows/release.yml": {
+    "mtime": 1784711174.5100386,
+    "ast_hash": "6729f02364018694dd9b9ac6eb7a3e86",
+    "semantic_hash": ""
+  },
+  ".github/workflows/security.yml": {
+    "mtime": 1784711174.5100386,
+    "ast_hash": "58ee6179ac18db40af75639b914ff25c",
+    "semantic_hash": ""
+  },
+  "CHANGELOG.md": {
+    "mtime": 1784714233.5469458,
+    "ast_hash": "c04971bbe5d9aadf5f322035c8f3f1e1",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1784711053.6575754,
+    "ast_hash": "153fc71dcbcedb80e7549a3a39bf0cad",
+    "semantic_hash": ""
+  },
+  "readme.txt": {
+    "mtime": 1784711053.644642,
+    "ast_hash": "c8ca33315c5da66759e279b69f523aa9",
+    "semantic_hash": ""
+  }
+}
